@@ -1,7 +1,11 @@
 import { useState } from 'react';
+<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
 import type { ChangeEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+=======
+import type { ChangeEvent, MouseEvent } from 'react';
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
 
 interface FormData {
   email: string;
@@ -14,15 +18,20 @@ interface FormErrors {
   [key: string]: string;
 }
 
+<<<<<<< HEAD
 export default function AuthPages() {
   const navigate = useNavigate();
   const { login, register } = useAuth();
 
+=======
+function AuthPages() {
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
+<<<<<<< HEAD
     name: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -37,6 +46,23 @@ export default function AuthPages() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
+=======
+    name: ''
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
     }
   };
 
@@ -56,7 +82,11 @@ export default function AuthPages() {
     }
 
     if (!isLogin) {
+<<<<<<< HEAD
       if (!formData.name.trim()) {
+=======
+      if (!formData.name) {
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
         newErrors.name = 'Name is required';
       }
       if (!formData.confirmPassword) {
@@ -70,6 +100,7 @@ export default function AuthPages() {
     return Object.keys(newErrors).length === 0;
   };
 
+<<<<<<< HEAD
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -102,14 +133,48 @@ export default function AuthPages() {
       });
     } finally {
       setIsSubmitting(false);
+=======
+  const handleSubmit = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    if (validateForm()) {
+      if (isLogin) {
+        console.log('Login attempt:', { email: formData.email, password: formData.password });
+        alert('Login successful! (This is a demo)');
+      } else {
+        console.log('Register attempt:', { 
+          name: formData.name, 
+          email: formData.email, 
+          password: formData.password 
+        });
+        alert('Registration successful! (This is a demo)');
+      }
+      setFormData({
+        email: '',
+        password: '',
+        confirmPassword: '',
+        name: ''
+      });
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
     }
   };
 
   const switchMode = () => {
+<<<<<<< HEAD
     setIsLogin((prev) => !prev);
     setFormData({ email: '', password: '', confirmPassword: '', name: '' });
     setErrors({});
     setStatus({ type: 'idle', message: '' });
+=======
+    setIsLogin(!isLogin);
+    setFormData({
+      email: '',
+      password: '',
+      confirmPassword: '',
+      name: ''
+    });
+    setErrors({});
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
   };
 
   return (
@@ -120,7 +185,11 @@ export default function AuthPages() {
           <p>{isLogin ? 'Sign in to continue' : 'Sign up to get started'}</p>
         </div>
 
+<<<<<<< HEAD
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
+=======
+        <div className="auth-form">
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
           {!isLogin && (
             <div className="form-group">
               <label htmlFor="name" className="form-label">
@@ -135,7 +204,13 @@ export default function AuthPages() {
                 className={`form-input ${errors.name ? 'error' : ''}`}
                 placeholder="John Doe"
               />
+<<<<<<< HEAD
               {errors.name && <p className="error-message">{errors.name}</p>}
+=======
+              {errors.name && (
+                <p className="error-message">{errors.name}</p>
+              )}
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
             </div>
           )}
 
@@ -152,7 +227,13 @@ export default function AuthPages() {
               className={`form-input ${errors.email ? 'error' : ''}`}
               placeholder="your@email.com"
             />
+<<<<<<< HEAD
             {errors.email && <p className="error-message">{errors.email}</p>}
+=======
+            {errors.email && (
+              <p className="error-message">{errors.email}</p>
+            )}
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
           </div>
 
           <div className="form-group">
@@ -168,7 +249,13 @@ export default function AuthPages() {
               className={`form-input ${errors.password ? 'error' : ''}`}
               placeholder="••••••••"
             />
+<<<<<<< HEAD
             {errors.password && <p className="error-message">{errors.password}</p>}
+=======
+            {errors.password && (
+              <p className="error-message">{errors.password}</p>
+            )}
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
           </div>
 
           {!isLogin && (
@@ -185,6 +272,7 @@ export default function AuthPages() {
                 className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
                 placeholder="••••••••"
               />
+<<<<<<< HEAD
               {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
             </div>
           )}
@@ -209,6 +297,34 @@ export default function AuthPages() {
             {isSubmitting ? 'Please wait…' : isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
+=======
+              {errors.confirmPassword && (
+                <p className="error-message">{errors.confirmPassword}</p>
+              )}
+            </div>
+          )}
+
+          {isLogin && (
+            <div className="remember-forgot">
+              <label className="checkbox-label">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <button 
+                type="button"
+                onClick={() => alert('Password reset coming soon!')}
+                className="forgot-link"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
+
+          <button onClick={handleSubmit} className="submit-btn">
+            {isLogin ? 'Sign In' : 'Create Account'}
+          </button>
+        </div>
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
 
         <div className="auth-footer">
           <div className="divider">
@@ -216,7 +332,11 @@ export default function AuthPages() {
           </div>
 
           <p className="switch-mode">
+<<<<<<< HEAD
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
+=======
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
             <button type="button" onClick={switchMode}>
               {isLogin ? 'Sign up' : 'Sign in'}
             </button>
@@ -226,3 +346,8 @@ export default function AuthPages() {
     </div>
   );
 }
+<<<<<<< HEAD
+=======
+
+export default AuthPages;
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5

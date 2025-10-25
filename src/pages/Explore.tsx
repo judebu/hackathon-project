@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { APIProvider, Map, Marker, useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import Sidebar from '../components/Sidebar';
@@ -473,4 +474,8 @@ export default function Explore() {
       </APIProvider>
     </div>
   );
+=======
+export default function Explore() {
+  return <div className="p-8 text-center text-xl">Explore Page 🍔</div>
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
 }

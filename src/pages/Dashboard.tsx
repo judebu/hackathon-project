@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useMemo, useState } from "react";
 import {
   PieChart,
@@ -486,4 +487,8 @@ export default function Dashboard() {
       </div>
     </div>
   );
+=======
+export default function Dashboard() {
+  return <div className="p-8 text-center text-xl">Dashboard Page 📊</div>
+>>>>>>> f423c607182ed796e47ddcce410441661046d7a5
 }
