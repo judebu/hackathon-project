@@ -14,6 +14,7 @@ const defaultFilters: FilterState = {
   minRating: 0,
 };
 
+
 const defaultCenter = { lat: 42.3495, lng: -71.0993 };
 
 const redMapStyle = [
@@ -34,9 +35,15 @@ const redMapStyle = [
     stylers: [{ color: '#ffb3b3' }],
   },
   {
-    featureType: 'poi',
-    stylers: [{ color: '#ffe6e9' }],
+    featureType: "poi",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }]
   },
+  {
+    featureType: "transit",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }]
+  }
 ];
 
 type PlaceSuggestion = { description: string; placeId: string };
@@ -67,6 +74,7 @@ export default function Explore() {
   const [searchTerm, setSearchTerm] = useState('');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [userRatings, setUserRatings] = useState<UserRatings>({});
+  const [userComments, setUserComments] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -82,6 +90,10 @@ export default function Explore() {
     placeId: string;
   } | null>(null);
   const [isSavingCandidate, setIsSavingCandidate] = useState(false);
+  const [savingReviewId, setSavingReviewId] = useState<number | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>(
+    { type: 'idle', message: '' }
+  );
 
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [mapZoom, setMapZoom] = useState(12);
@@ -112,13 +124,18 @@ export default function Explore() {
       setRestaurants(response.restaurants);
 
       const ratingLookup: UserRatings = {};
+      const commentLookup: Record<number, string> = {};
       response.restaurants.forEach((restaurant) => {
-        const userRating = (restaurant as unknown as { user_rating?: number }).user_rating;
-        if (userRating != null) {
-          ratingLookup[restaurant.id] = userRating;
+        const enriched = restaurant as Restaurant & { user_rating?: number; user_comment?: string };
+        if (enriched.user_rating != null) {
+          ratingLookup[enriched.id] = enriched.user_rating;
+        }
+        if (enriched.user_comment != null) {
+          commentLookup[enriched.id] = enriched.user_comment;
         }
       });
       setUserRatings((prev) => ({ ...ratingLookup, ...prev }));
+      setUserComments((prev) => ({ ...commentLookup, ...prev }));
     } catch (error) {
       setListError(error instanceof Error ? error.message : 'Unable to load restaurants.');
     } finally {
@@ -129,6 +146,14 @@ export default function Explore() {
   useEffect(() => {
     void refreshRestaurants();
   }, [refreshRestaurants]);
+
+  useEffect(() => {
+    if (statusMessage.type !== 'idle') {
+      const timer = window.setTimeout(() => setStatusMessage({ type: 'idle', message: '' }), 2500);
+      return () => window.clearTimeout(timer);
+    }
+    return undefined;
+  }, [statusMessage]);
 
   const handleFilterChange = (partial: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -178,17 +203,49 @@ export default function Explore() {
     return Array.from(set);
   }, [restaurants]);
 
-  const handleRatingChange = async (restaurantId: number, rating: number) => {
+  const handleRatingChange = (restaurantId: number, rating: number) => {
     if (!user) {
       window.alert('Please sign in to rate restaurants.');
       return;
     }
+    setUserRatings((prev) => ({ ...prev, [restaurantId]: rating }));
+  };
+
+  const handleCommentChange = (restaurantId: number, value: string) => {
+    if (!user) {
+      window.alert('Sign in to leave a review.');
+      return;
+    }
+    setUserComments((prev) => ({ ...prev, [restaurantId]: value }));
+  };
+
+  const handleSubmitReview = async (restaurantId: number) => {
+    if (!user) {
+      window.alert('Please sign in to save reviews.');
+      return;
+    }
+
+    const rating = userRatings[restaurantId] ?? 0;
+    if (!rating) {
+      window.alert('Add a rating before saving your review.');
+      return;
+    }
+
+    setSavingReviewId(restaurantId);
     try {
-      await submitReview(restaurantId, { rating });
-      setUserRatings((prev) => ({ ...prev, [restaurantId]: rating }));
+      await submitReview(restaurantId, {
+        rating,
+        comment: userComments[restaurantId] ?? '',
+      });
       await refreshRestaurants();
+      setStatusMessage({ type: 'success', message: 'Review saved.' });
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to save rating.');
+      setStatusMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Unable to save review.',
+      });
+    } finally {
+      setSavingReviewId(null);
     }
   };
 
@@ -327,8 +384,12 @@ export default function Explore() {
       });
       setSelectedCandidate(null);
       await refreshRestaurants();
+      setStatusMessage({ type: 'success', message: 'Restaurant added to your list.' });
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to save that restaurant.');
+      setStatusMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Unable to save that restaurant.',
+      });
     } finally {
       setIsSavingCandidate(false);
     }
@@ -345,11 +406,13 @@ export default function Explore() {
             prices={prices}
             locations={locations}
             userRatings={userRatings}
+            userComments={userComments}
             isLoading={isLoading}
             errorMessage={listError}
             searchTerm={searchTerm}
             suggestions={suggestions}
             canRate={Boolean(user)}
+            isSavingReview={savingReviewId}
             selectedCandidate={selectedCandidate}
             onSearchChange={handleSearchChange}
             onSelectSuggestion={handleSelectSuggestion}
@@ -357,6 +420,8 @@ export default function Explore() {
             isSavingCandidate={isSavingCandidate}
             onFilterChange={handleFilterChange}
             onRatingChange={handleRatingChange}
+            onCommentChange={handleCommentChange}
+            onSubmitReview={handleSubmitReview}
             onClearFilters={handleClearFilters}
           />
 
@@ -365,7 +430,7 @@ export default function Explore() {
               style={{ width: '100%', height: '100%' }}
               defaultCenter={defaultCenter}
               defaultZoom={12}
-              mapOptions={{ styles: redMapStyle, disableDefaultUI: true }}
+              options={{ styles: redMapStyle, disableDefaultUI: true }}
             >
               <MapController center={mapCenter} zoom={mapZoom} />
               {filteredRestaurants.map((restaurant) => {
@@ -387,6 +452,24 @@ export default function Explore() {
             </Map>
           </div>
         </div>
+
+        {statusMessage.type !== 'idle' && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '1.5rem',
+              right: '1.5rem',
+              background: statusMessage.type === 'error' ? '#7a0c22' : '#25643c',
+              color: 'white',
+              padding: '0.85rem 1.2rem',
+              borderRadius: '0.75rem',
+              boxShadow: '0 18px 32px -24px rgba(0,0,0,0.45)',
+              fontSize: '0.9rem',
+            }}
+          >
+            {statusMessage.message}
+          </div>
+        )}
       </APIProvider>
     </div>
   );

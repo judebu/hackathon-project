@@ -17,18 +17,26 @@ type TabKey = "reviews" | "saved" | "profile";
 const palette = ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#F97316"];
 const preferenceOptions = ["Vegetarian", "Vegan", "Gluten-Free", "Halal", "Kosher"];
 
-interface SavedSummary {
-  name: string;
-  rating: number;
-  totalReviews: number;
-  cuisine?: string;
-  imageUrl: string;
-}
+const cuisineEmoji: Record<string, string> = {
+  American: "🍔",
+  Asian: "🥢",
+  Italian: "🍝",
+  French: "🥐",
+  Pizza: "🍕",
+  Mexican: "🌮",
+  Seafood: "🦞",
+  Mediterranean: "🥙",
+  Japanese: "🍣",
+  "Middle Eastern": "🥙",
+  Indian: "🍛",
+  Breakfast: "🍳",
+  Default: "🍽️",
+};
 
-function getPlaceholderImage(name: string) {
-  const encoded = encodeURIComponent(name);
-  return `https://source.unsplash.com/featured/?food,${encoded}`;
-}
+const getEmojiForCuisine = (cuisine?: string) => {
+  if (!cuisine) return cuisineEmoji.Default;
+  return cuisineEmoji[cuisine] ?? cuisineEmoji.Default;
+};
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabKey>("reviews");
@@ -98,10 +106,12 @@ export default function Dashboard() {
 
   
   const categoryData = [
-    { name: "American", value: 40 },
-    { name: "Italian", value: 25 },
-    { name: "Cherries", value: 20 },
-    { name: "Grapes", value: 15 }
+    { name: "American", value: 39, color: palette[0] },
+    { name: "Asian", value: 24, color: palette[1] },
+    { name: "Italian", value: 23, color: palette[2] },
+    { name: "French", value: 5, color: palette[3] },
+    { name: "Pizza", value: 6, color: palette[4] },
+    { name: "Other", value: 3, color: palette[5] }
   ];
 
   // const categoryData = useMemo(() => {
@@ -120,35 +130,20 @@ export default function Dashboard() {
   //   }));
   // }, [reviews]);
 
-  const savedPlaces = useMemo<SavedSummary[]>(() => {
-    const byRestaurant = new Map<
-      number,
-      { name: string; total: number; count: number; cuisine?: string }
-    >();
-
-    for (const review of reviews) {
-      const entry = byRestaurant.get(review.restaurant_id) ?? {
-        name: review.restaurant_name ?? "Unknown restaurant",
-        total: 0,
-        count: 0,
-        cuisine: review.restaurant_cuisine ?? undefined,
-      };
-      entry.total += review.rating;
-      entry.count += 1;
-      byRestaurant.set(review.restaurant_id, entry);
-    }
-
-    return Array.from(byRestaurant.values())
-      .map((entry) => ({
-        name: entry.name,
-        rating: Number((entry.total / entry.count).toFixed(1)),
-        totalReviews: entry.count,
-        cuisine: entry.cuisine,
-        imageUrl: getPlaceholderImage(entry.name),
-      }))
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 6);
-  }, [reviews]);
+  const savedPlaces = useMemo(
+    () =>
+      reviews
+        .map((review) => ({
+          id: review.restaurant_id,
+          name: review.restaurant_name ?? 'Unknown restaurant',
+          cuisine: review.restaurant_cuisine ?? 'Cuisine',
+          rating: review.rating,
+          comment: review.comment,
+          date: review.created_at,
+        }))
+        .sort((a, b) => b.rating - a.rating),
+    [reviews]
+  );
 
   const handlePreferenceToggle = (option: string) => {
     setProfileForm((prev) => {
@@ -275,7 +270,10 @@ export default function Dashboard() {
                             dataKey="value"
                           >
                             {categoryData.map((entry, index) => (
-                              <Cell key={`cell-${entry.name}-${index}`} fill={entry.color} />
+                              <Cell
+                                key={`cell-${entry.name}-${index}`}
+                                fill={entry.color ?? palette[index % palette.length]}
+                              />
                             ))}
                           </Pie>
                           <Tooltip />
@@ -295,7 +293,7 @@ export default function Dashboard() {
                             <div className="category-color" style={{ backgroundColor: category.color }} />
                             <span>{category.name}</span>
                           </div>
-                          <span>{category.value} visits</span>
+                          <span>{category.value} restaurants</span>
                         </div>
                       ))
                     ) : (
@@ -324,7 +322,19 @@ export default function Dashboard() {
                   ) : (
                     reviews.map((review) => (
                       <div key={review.id} className="review-card">
-                        <div className="review-img" style={{ backgroundImage: `url(${getPlaceholderImage(review.restaurant_name ?? "food")})` }} />
+                        <div
+                          className="review-img"
+                          aria-hidden="true"
+                          style={{
+                            backgroundColor: '#ffe5ea',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.4rem',
+                          }}
+                        >
+                          {getEmojiForCuisine(review.restaurant_cuisine)}
+                        </div>
                         <div style={{ flex: 1 }}>
                           <div
                             style={{
@@ -380,14 +390,13 @@ export default function Dashboard() {
                 </p>
               ) : (
                 savedPlaces.map((place) => (
-                  <div key={place.name} className="saved-card">
-                    <img src={place.imageUrl} alt={place.name} className="saved-img" />
+                  <div key={place.id} className="saved-card">
+                    <div className="saved-emoji" aria-hidden="true">
+                      {getEmojiForCuisine(place.cuisine)}
+                    </div>
                     <div className="saved-body">
                       <h3 className="saved-title">{place.name}</h3>
-                      <p className="saved-category">
-                        {place.cuisine ? place.cuisine : "Cuisine"} • {place.totalReviews} review
-                        {place.totalReviews > 1 ? "s" : ""}
-                      </p>
+                      <p className="saved-category">{place.cuisine ?? 'Cuisine'}</p>
                       <div className="saved-bottom">
                         <div
                           style={{
@@ -397,10 +406,15 @@ export default function Dashboard() {
                           }}
                         >
                           <span style={{ color: "#facc15" }}>★</span>
-                          <span>{place.rating}</span>
+                          <span>{place.rating.toFixed(1)}</span>
                         </div>
-                        <button className="saved-heart">Saved</button>
+                        <span className="saved-date">
+                          {new Date(place.date).toLocaleDateString()}
+                        </span>
                       </div>
+                      {place.comment && (
+                        <p className="saved-comment">“{place.comment}”</p>
+                      )}
                     </div>
                   </div>
                 ))
