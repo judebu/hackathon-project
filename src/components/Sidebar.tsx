@@ -23,6 +23,7 @@ interface SidebarProps {
     priceLevel?: string;
     locationLabel?: string;
   } | null;
+  isDemoMode?: boolean;
   onSearchChange: (value: string) => void;
   onSelectSuggestion: (placeId: string) => void;
   onSaveCandidate: () => void;
@@ -49,6 +50,7 @@ export default function Sidebar({
   canRate,
   isSavingReview = null,
   selectedCandidate,
+  isDemoMode = false,
   onSearchChange,
   onSelectSuggestion,
   onSaveCandidate,
@@ -96,6 +98,11 @@ export default function Sidebar({
         <p className="sidebar-subtitle">
           Browse restaurants around campus and tailor the list to match what you're craving.
         </p>
+        {isDemoMode && (
+          <div className="demo-banner">
+            <strong>Live preview:</strong> Showing sample data while the API is offline.
+          </div>
+        )}
         <div className="sidebar-search">
           <label htmlFor="search" className="sidebar-label">
             Search
@@ -138,10 +145,13 @@ export default function Sidebar({
               type="button"
               className="save-candidate"
               onClick={onSaveCandidate}
-              disabled={isSavingCandidate}
+              disabled={isSavingCandidate || isDemoMode}
             >
-              {isSavingCandidate ? 'Saving…' : 'Add to list'}
+              {isDemoMode ? 'Read-only preview' : isSavingCandidate ? 'Saving…' : 'Add to list'}
             </button>
+            {isDemoMode && (
+              <p className="candidate-hint">Saving is disabled in this live preview.</p>
+            )}
           </div>
         )}
       </div>

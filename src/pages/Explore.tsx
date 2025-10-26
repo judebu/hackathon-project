@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar';
 import type { FilterState, Restaurant, UserRatings } from '../types/restaurant';
 import './Explore.css';
 import { addRestaurant, listRestaurants, submitReview } from '../api/restaurants';
+import { IS_DEMO_MODE } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 
 const defaultFilters: FilterState = {
@@ -70,6 +71,7 @@ function MapController({ center, zoom }: MapControllerProps) {
 }
 
 function ExploreContent({ apiKey }: { apiKey: string }) {
+  const isDemoMode = IS_DEMO_MODE;
   const [filters, setFilters] = useState<FilterState>({ ...defaultFilters });
   const [searchTerm, setSearchTerm] = useState('');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -91,9 +93,10 @@ function ExploreContent({ apiKey }: { apiKey: string }) {
   } | null>(null);
   const [isSavingCandidate, setIsSavingCandidate] = useState(false);
   const [savingReviewId, setSavingReviewId] = useState<number | null>(null);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>(
-    { type: 'idle', message: '' }
-  );
+  const [statusMessage, setStatusMessage] = useState<{ type: 'idle' | 'success' | 'error'; message: string }>({
+    type: 'idle',
+    message: '',
+  });
 
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [mapZoom, setMapZoom] = useState(12);
@@ -154,6 +157,15 @@ function ExploreContent({ apiKey }: { apiKey: string }) {
     }
     return undefined;
   }, [statusMessage]);
+
+  useEffect(() => {
+    if (isDemoMode) {
+      setStatusMessage({
+        type: 'success',
+        message: 'Demo mode: showing a curated sample of Boston favorites.',
+      });
+    }
+  }, [isDemoMode]);
 
   const handleFilterChange = (partial: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -228,6 +240,14 @@ function ExploreContent({ apiKey }: { apiKey: string }) {
     const rating = userRatings[restaurantId] ?? 0;
     if (!rating) {
       window.alert('Add a rating before saving your review.');
+      return;
+    }
+
+    if (isDemoMode) {
+      setStatusMessage({
+        type: 'error',
+        message: 'Demo mode is read-only; reviews are disabled for the live preview.',
+      });
       return;
     }
 
@@ -368,6 +388,14 @@ function ExploreContent({ apiKey }: { apiKey: string }) {
       return;
     }
 
+    if (isDemoMode) {
+      setStatusMessage({
+        type: 'error',
+        message: 'Demo mode is read-only; adding new restaurants is disabled.',
+      });
+      return;
+    }
+
     setIsSavingCandidate(true);
     try {
       await addRestaurant({
@@ -411,9 +439,10 @@ function ExploreContent({ apiKey }: { apiKey: string }) {
             errorMessage={listError}
             searchTerm={searchTerm}
             suggestions={suggestions}
-            canRate={Boolean(user)}
+            canRate={Boolean(user) && !isDemoMode}
             isSavingReview={savingReviewId}
             selectedCandidate={selectedCandidate}
+            isDemoMode={isDemoMode}
             onSearchChange={handleSearchChange}
             onSelectSuggestion={handleSelectSuggestion}
             onSaveCandidate={handleSaveCandidate}

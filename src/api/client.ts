@@ -1,4 +1,5 @@
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+export const IS_DEMO_MODE = API_BASE.length === 0;
 
 interface RequestOptions extends RequestInit {
   auth?: boolean;
@@ -17,6 +18,10 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
+  }
+
+  if (IS_DEMO_MODE) {
+    throw new Error('Demo mode active — network requests are disabled.');
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
