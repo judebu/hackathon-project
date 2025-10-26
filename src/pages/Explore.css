@@ -22,6 +22,31 @@
   box-shadow: inset 0 0 0 1px rgba(122, 12, 34, 0.08);
 }
 
+.map-placeholder {
+  height: 100%;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1rem;
+  background: linear-gradient(150deg, rgba(255, 245, 245, 0.9), rgba(255, 226, 231, 0.9));
+  color: #5c1a29;
+}
+
+.map-placeholder h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #7a0c22;
+}
+
+.map-placeholder p {
+  max-width: 28rem;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 1024px) {
   .explore-layout {
     grid-template-columns: 1fr;
