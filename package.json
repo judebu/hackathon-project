@@ -7,24 +7,20 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-<<<<<<< HEAD
     "preview": "vite preview",
     "server": "node --env-file .env server/index.js"
   },
   "dependencies": {
+    "@types/recharts": "^1.8.29",
     "@vis.gl/react-google-maps": "^1.6.1",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.6.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-=======
-    "preview": "vite preview"
-  },
-  "dependencies": {
->>>>>>> f423c607182ed796e47ddcce410441661046d7a5
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "recharts": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
