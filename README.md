@@ -1,73 +1,38 @@
-# React + TypeScript + Vite
+# 🍽️ BU Eats — Boston University Restaurant Finder
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BU Eats is a full-stack web app that helps Boston University students discover restaurants around campus.  
+It displays nearby restaurants on an interactive Google Map, lets users filter by cuisine or popularity, and includes features for **ratings**, **comments**, and **user authentication**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- 🗺️ **Interactive Map:** Displays restaurants near BU using the Google Maps API.  
+- 🔍 **Smart Filters:** Filter restaurants by food type, distance, or popularity.  
+- ⭐ **Ratings & Comments:** Students can rate and comment on restaurants.  
+- 👤 **Authentication:** Basic login/register flow with encrypted passwords.  
+- 🧩 **Responsive UI:** Built with React + Tailwind CSS.  
+- 🗄️ **SQLite Database:** Stores user accounts, reviews, and restaurant info.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🧰 Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | React, Vite, Tailwind CSS, React Router |
+| **Backend** | Node.js, Express.js |
+| **Database** | Better-SQLite3 |
+| **Maps API** | Google Maps JavaScript API |
+| **Auth** | bcrypt for password hashing |
+| **Containerization** | Docker + Docker Compose |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠️ Local Setup
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 1. Clone the repository
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+```bash
+git clone https://github.com/judebu/hackathon-project.git
+cd hackathon-project

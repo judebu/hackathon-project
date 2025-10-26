@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    container_name: bu-eats-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"      # map host:container ports (backend)
+      - "5173:5173"      # optional if you want Vite dev server; remove for production
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data          # persist sqlite database and any uploaded files
+      - .env:/app/.env:ro         # mount env file read-only into container (optional)
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
