@@ -1,22 +1,22 @@
-import React, { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import './index.css';
-import App from './App';
-import { AuthProvider } from './context/AuthContext';
+import App from './App.tsx';
+import { AuthProvider } from './context/AuthContext.tsx';
 
-const rootElement = document.getElementById('root');
+const rawBase = import.meta.env.VITE_PUBLIC_BASE?.trim();
+const normalizedBase =
+  rawBase && rawBase !== '/' && rawBase !== './'
+    ? rawBase.replace(/^\//, '').replace(/\/$/, '')
+    : undefined;
 
-if (!rootElement) {
-  throw new Error("Root element not found. Make sure you have a <div id='root'></div> in index.html");
-}
-
-createRoot(rootElement).render(
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter basename={normalizedBase ? `/${normalizedBase}` : undefined}>
       <AuthProvider>
         <App />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>
 );

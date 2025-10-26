@@ -69,7 +69,7 @@ function MapController({ center, zoom }: MapControllerProps) {
   return null;
 }
 
-export default function Explore() {
+function ExploreContent({ apiKey }: { apiKey: string }) {
   const [filters, setFilters] = useState<FilterState>({ ...defaultFilters });
   const [searchTerm, setSearchTerm] = useState('');
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -397,7 +397,7 @@ export default function Explore() {
 
   return (
     <div className="explore-page">
-      <APIProvider apiKey="AIzaSyAYLtTmvZu0omy6kREwzeeIPczhEs2-jVw">
+      <APIProvider apiKey={apiKey}>
         <div className="explore-layout">
           <Sidebar
             filters={filters}
@@ -473,4 +473,34 @@ export default function Explore() {
       </APIProvider>
     </div>
   );
+}
+
+export default function Explore() {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.trim();
+
+  if (!apiKey) {
+    return (
+      <div className="explore-page">
+        <div className="explore-layout">
+          <div
+            className="map-wrapper"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ maxWidth: '28rem', lineHeight: 1.5 }}>
+              Add a Google Maps API key to a <code>VITE_GOOGLE_MAPS_API_KEY</code> environment variable before building
+              for GitHub Pages to enable the map and Places search experience.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <ExploreContent apiKey={apiKey} />;
 }
